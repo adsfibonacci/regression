@@ -5,23 +5,19 @@
 
 using namespace std;
 
-template<typename T>
-ostream &operator<<(ostream &os, const vector<T>& v) {
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &v) {
   for (size_t i = 0; i < v.size(); ++i)
     os << v[i] << "\t";
   return os;
 }
-template<typename T>
-ostream &operator<<(ostream &os, const vector<vector<T>>& v) {
+template <typename T> ostream &operator<<(ostream &os, const vector<vector<T>> &v) {  
   for (size_t i = 0; i < v.size(); ++i)
     os << v[i] << "\n";
   return os;
 }
 
 int main() {
-  vector<vector<size_t>> folds;
-  folds = kfolds(17, 3, (int)time(0));
-  cout << folds << endl;
   vector<vector<double>> X = loadMatrix("design_matrix.txt");
-  vector<double> y = loadVector("responses.txt");  
+  vector<double> y = loadVector("responses.txt");
+  vector<vector<size_t>> folds = kfolds(X.size(), 10, (int)time(0));  
 }  
