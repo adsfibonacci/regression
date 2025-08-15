@@ -19,12 +19,6 @@ template <typename T> ostream &operator<<(ostream &os, const vector<vector<T>> &
 int main() {
   vector<vector<double>> X = loadMatrix("design_matrix.txt");
   vector<double> y = loadVector("responses.txt");
-  vector<vector<size_t>> folds = kfolds(X.size(), 10, (int)time(0));
-  int sum = 0;  
-  for (size_t i = 0; i < folds.size(); ++i) {
-    cout << folds[i].size() << "\t";
-    sum += (int)folds[i].size();
-  }
-  cout << endl << sum << endl;  
-  
+  vector<vector<size_t>> folds = stratified_kfolds(y, 10);
+  cout << folds << endl;  
 }  
