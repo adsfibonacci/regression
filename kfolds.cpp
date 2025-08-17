@@ -1,20 +1,5 @@
 #include "kfolds.h"
-using std::cout, std::endl;
 
-template <typename T>
-std::ostream &operator<<(std::ostream &os, std::vector<T> &v) {
-  for (size_t i = 0; i < v.size(); ++i)
-    os << v[i] << "\t";
-  os << endl;  
-  return os;
-}  
-
-/**
- * Return N-folds of indices to define the X_train/test and y_train/test
- * samples should be the first dimension of the design matrix
- * k should be the number of folds to make
- * seed is the random state
- */
 std::vector<std::vector<size_t>> kfolds(size_t samples, size_t k,
                                         unsigned int seed) {
   std::vector<size_t> indices(samples);
@@ -34,13 +19,6 @@ std::vector<std::vector<size_t>> kfolds(size_t samples, size_t k,
   }    
   return kfolds;
 }
-
-/**
- * Return N-folds of indices to define the X_train/test and y_train/test in a stratified manner
- * y should be the response vector with all response classes
- * k should be the number of folds to make
- * seed is the random state
- */
 std::vector<std::vector<size_t>>
 stratified_kfolds(std::vector<double> &y, size_t k, unsigned int seed) {
   std::unordered_map<double, std::vector<size_t>> class_indices;
@@ -82,4 +60,34 @@ std::vector<T> index(std::vector<T> &vec, std::vector<size_t> &in) {
   for (size_t i = 0; i < in.size(); ++i)
     subset[i] = vec[in[i]];
   return subset;   
+}
+void train_test_split(const std::vector<std::vector<double>> &X,
+                      const std::vector<double> &y,
+                      std::vector<std::vector<double>> &X_train,
+                      std::vector<double> &y_train,
+                      std::vector<std::vector<double>> &X_test,
+                      std::vector<double> &y_test, double test_fraction,
+                      unsigned random_seed) {  
+  size_t n_samples = X.size();
+  std::vector<size_t> indices(n_samples);
+  for (size_t i = 0; i < n_samples; ++i) indices[i] = i;
+  
+  std::mt19937 rng(random_seed);
+  shuffle(indices.begin(), indices.end(), rng);
+  
+  size_t n_test = static_cast<size_t>(test_fraction * n_samples);
+  
+  X_train.clear(); y_train.clear();
+  X_test.clear();  y_test.clear();
+  
+  for (size_t i = 0; i < n_samples; ++i) {
+    size_t idx = indices[i];
+    if (i < n_test) {
+      X_test.push_back(X[idx]);
+      y_test.push_back(y[idx]);
+    } else {
+      X_train.push_back(X[idx]);
+      y_train.push_back(y[idx]);
+    }
+  }
 }

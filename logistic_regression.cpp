@@ -1,59 +1,26 @@
-#include <vector>
-#include <cmath>
-#include <string>
-#include <algorithm> // for std::clamp, std::abs
-#include <ctime>
+#include "logistic_regression.h"
 
-#include "load_files.cpp"
-#include "train_test_split.cpp"
-#include "scoring.cpp"
-#include "kfolds.cpp"
-
-using std::vector, std::string;
-
-// Enum for penalty type
-enum class Penalty { None, L1, L2 };
-
-// Utility function: convert string to Penalty enum
-Penalty string_to_penalty(const string& s) {
-    if (s == "l1") return Penalty::L1;
-    if (s == "l2") return Penalty::L2;
-    return Penalty::None;
+Penalty string_to_penalty(const std::string& s) {
+  if (s == "l1") return Penalty::L1;
+  if (s == "l2") return Penalty::L2;
+  return Penalty::None;
 }
 
-// Sigmoid function for logistic regression
 double sigmoid(double z) {
     return 1.0 / (1.0 + std::exp(-z));
 }
-
-/**
- * Trains logistic regression with optional L1/L2/no penalty using batch gradient descent.
- * X: n x d feature matrix (vector of n samples, each with d features)
- * y: size n vector with binary labels (0 or 1)
- * w: output vector for weights (size d)
- * b: output bias term
- * lambda: regularization strength (default 1.0)
- * lr: learning rate (default 0.01)
- * epochs: number of gradient steps (default 1000)
- * penalty: enum to choose L1, L2, or None penalty
- */
-void logistic_regression(
-    const vector<vector<double>>& X,
-    const vector<double>& y,
-    vector<double>& w,
-    double& b,
-    double lambda = 1.0,
-    double lr = 0.01,
-    int epochs = 1000,
-    Penalty penalty = Penalty::L2
-) {
+void logistic_regression(const std::vector<std::vector<double>> &X,
+                         const std::vector<double> &y, std::vector<double> &w,
+                         double &b, double lambda, double lr,
+                         int epochs, Penalty penalty) {
+  
   size_t n = X.size();     // Number of training examples
   size_t d = X[0].size();  // Number of features
   w.assign(d, 0.0);        // Initialize weights to zero
   b = 0.0;                 // Initialize bias to zero
   
   for (int epoch = 0; epoch < epochs; ++epoch) {
-    vector<double> grad_w(d, 0.0); // Gradient accumulator for weights
+    std::vector<double> grad_w(d, 0.0); // Gradient accumulator for weights                                        // 
     double grad_b = 0.0;                // Gradient accumulator for bias
     
     // ----- Compute gradients -----
@@ -122,33 +89,31 @@ void logistic_regression(
 double predict_one(const std::vector<double> &x,
                    const std::vector<double> &w,
                    double b) {
-    double z = b;
-    for (size_t j = 0; j < w.size(); ++j)
-        z += w[j] * x[j];
-    return 1.0 / (1.0 + std::exp(-z));
+  double z = b;
+  for (size_t j = 0; j < w.size(); ++j)
+    z += w[j] * x[j];
+  return 1.0 / (1.0 + std::exp(-z));
 }
 
 // Predicts probabilities for all rows in X_test
-std::vector<double> predict_proba(
-    const std::vector<std::vector<double>>& X_test,
-    const std::vector<double>& w,
-    double b) {
-    std::vector<double> probas;
-    for (const auto& x : X_test)
-        probas.push_back(predict_one(x, w, b));
-    return probas;
+std::vector<double>
+predict_proba(const std::vector<std::vector<double>> &X_test,
+              const std::vector<double> &w, double b) {
+  std::vector<double> probas;
+  for (const auto& x : X_test)
+    probas.push_back(predict_one(x, w, b));
+  return probas;
 }
 // Predicts classes (0/1) for all test samples using a threshold (default 0.5)
-std::vector<double> predict_class(
-    const std::vector<std::vector<double>>& X_test,
-    const std::vector<double>& w,
-    double b, double thresh=0.5) {
-    std::vector<double> preds;
-    for (const auto& x : X_test) {
-        double p = predict_one(x, w, b);
-        preds.push_back(p >= thresh ? 1 : 0);
-    }
-    return preds;
+std::vector<double>
+predict_class(const std::vector<std::vector<double>> &X_test,
+              const std::vector<double> &w, double b, double thresh) {
+  std::vector<double> preds;
+  for (const auto& x : X_test) {
+    double p = predict_one(x, w, b);
+    preds.push_back(p >= thresh ? 1 : 0);
+  }
+  return preds;
 }
 
 
