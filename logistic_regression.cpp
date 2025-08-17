@@ -5,28 +5,24 @@ Penalty string_to_penalty(const std::string& s) {
   if (s == "l2") return Penalty::L2;
   return Penalty::None;
 }
+double sigmoid(double z) { return 1.0 / (1.0 + std::exp(-z)); }
 
-double sigmoid(double z) {
-    return 1.0 / (1.0 + std::exp(-z));
-}
 void logistic_regression(const std::vector<std::vector<double>> &X,
                          const std::vector<double> &y, std::vector<double> &w,
-                         double &b, double lambda, double lr,
+			 double lambda, double lr,
                          int epochs, Penalty penalty) {
   
   size_t n = X.size();     // Number of training examples
   size_t d = X[0].size();  // Number of features
-  w.assign(d, 0.0);        // Initialize weights to zero
-  b = 0.0;                 // Initialize bias to zero
+  w.assign(d+1, 0.0);        // Initialize weights to zero
   
   for (int epoch = 0; epoch < epochs; ++epoch) {
-    std::vector<double> grad_w(d, 0.0); // Gradient accumulator for weights                                        // 
-    double grad_b = 0.0;                // Gradient accumulator for bias
+    std::vector<double> grad_w(d+1, 0.0); // Gradient accumulator for weights
     
     // ----- Compute gradients -----
     for (size_t i = 0; i < n; ++i) {
       // Calculate linear combination for sample i
-      double z = b;
+      double z = w.back();
       for (size_t j = 0; j < d; ++j)
 	z += w[j] * X[i][j];
       double y_pred = sigmoid(z);           // Model prediction
@@ -35,7 +31,7 @@ void logistic_regression(const std::vector<std::vector<double>> &X,
       // Contribute to gradients for weights and bias
       for (size_t j = 0; j < d; ++j)
 	grad_w[j] += error * X[i][j];
-      grad_b += error;
+      grad_w.back() += error;
     }
     
     // ----- Normalize and add penalty gradients -----
@@ -53,14 +49,14 @@ void logistic_regression(const std::vector<std::vector<double>> &X,
       w[j] -= lr * grad_w[j]; // Gradient descent step for weight
     }
     
-    grad_b /= n;                 // Normalize bias gradient
-    b -= lr * grad_b;            // Gradient descent step for bias
+    grad_w.back() /= n;                 // Normalize bias gradient
+    w.back() -= lr * grad_w.back();            // Gradient descent step for bias
     
     // ----- (Optional) Print loss every 100 epochs -----
     if ((epoch+1) % 100 == 0) {
       double loss = 0.0;
       for (size_t i = 0; i < n; ++i) {
-	double z = b;
+	double z = w.back();
 	for (size_t j = 0; j < d; ++j)
 	  z += w[j] * X[i][j];
 	double p = sigmoid(z);
@@ -87,10 +83,9 @@ void logistic_regression(const std::vector<std::vector<double>> &X,
 }
 // Returns sigmoid(w^T x + b)
 double predict_one(const std::vector<double> &x,
-                   const std::vector<double> &w,
-                   double b) {
-  double z = b;
-  for (size_t j = 0; j < w.size(); ++j)
+                   const std::vector<double> &w) {
+  double z = w.back();
+  for (size_t j = 0; j < w.size() - 1; ++j)
     z += w[j] * x[j];
   return 1.0 / (1.0 + std::exp(-z));
 }
@@ -98,19 +93,19 @@ double predict_one(const std::vector<double> &x,
 // Predicts probabilities for all rows in X_test
 std::vector<double>
 predict_proba(const std::vector<std::vector<double>> &X_test,
-              const std::vector<double> &w, double b) {
+              const std::vector<double> &w) {
   std::vector<double> probas;
   for (const auto& x : X_test)
-    probas.push_back(predict_one(x, w, b));
+    probas.push_back(predict_one(x, w));
   return probas;
 }
 // Predicts classes (0/1) for all test samples using a threshold (default 0.5)
 std::vector<double>
 predict_class(const std::vector<std::vector<double>> &X_test,
-              const std::vector<double> &w, double b, double thresh) {
+              const std::vector<double> &w, double thresh) {
   std::vector<double> preds;
   for (const auto& x : X_test) {
-    double p = predict_one(x, w, b);
+    double p = predict_one(x, w);
     preds.push_back(p >= thresh ? 1 : 0);
   }
   return preds;

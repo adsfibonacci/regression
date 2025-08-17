@@ -54,20 +54,13 @@ stratified_kfolds(std::vector<double> &y, size_t k, unsigned int seed) {
   return kfolds;
 }
 
-template <typename T>
-std::vector<T> index(std::vector<T> &vec, std::vector<size_t> &in) {
-  std::vector<T> subset(in.size());
-  for (size_t i = 0; i < in.size(); ++i)
-    subset[i] = vec[in[i]];
-  return subset;   
-}
 void train_test_split(const std::vector<std::vector<double>> &X,
                       const std::vector<double> &y,
                       std::vector<std::vector<double>> &X_train,
                       std::vector<double> &y_train,
                       std::vector<std::vector<double>> &X_test,
                       std::vector<double> &y_test, double test_fraction,
-                      unsigned random_seed) {  
+		      unsigned random_seed) {
   size_t n_samples = X.size();
   std::vector<size_t> indices(n_samples);
   for (size_t i = 0; i < n_samples; ++i) indices[i] = i;
@@ -89,5 +82,33 @@ void train_test_split(const std::vector<std::vector<double>> &X,
       X_train.push_back(X[idx]);
       y_train.push_back(y[idx]);
     }
+  }
+}
+
+void train_test_split(const std::vector<std::vector<double>> &X,
+		      const std::vector<double> &y,
+		      std::vector<std::vector<double>> &X_train,
+		      std::vector<double> &y_train,
+		      std::vector<std::vector<double>> &X_test,
+		      std::vector<double> &y_test,
+		      std::vector<std::vector<size_t>> &fold,
+		      double test_fraction) {
+  X_train.clear(); X_test.clear();
+  y_train.clear(); y_test.clear();
+  
+  size_t test_size = std::round( test_fraction * fold.size() );
+  test_size += (test_size > 1) ? 1: 0;
+  size_t i = 0;
+  for(; i < test_size; ++i) {
+    std::vector<std::vector<double>> temp_x = index(X, fold[i]);
+    std::vector<double> temp_y = index(y, fold[i]);
+    X_test.insert(X_test.end(), temp_x.begin(), temp_x.end());
+    y_test.insert(y_test.end(), temp_y.begin(), temp_y.end());
+  }
+  for(; i < fold.size(); ++i) {
+    std::vector<std::vector<double>> temp_x = index(X, fold[i]);
+    std::vector<double> temp_y = index(y, fold[i]);
+    X_train.insert(X_train.end(), temp_x.begin(), temp_x.end());
+    y_train.insert(y_train.end(), temp_y.begin(), temp_y.end());
   }
 }
