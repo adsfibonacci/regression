@@ -1,11 +1,6 @@
-#include <numeric>
-#include <vector>
-#include <limits>
+#include "scoring.h"
 
-/**
- * Returns the fraction of equal entries in two vectors as accuracy.
- * Both vectors must be of same length and contain values 0 or 1.
- */
+
 double accuracy(const std::vector<double> &y_true,
                 const std::vector<double> &y_pred) {
   if (y_pred.size() != y_true.size() || y_pred.empty())
@@ -16,11 +11,7 @@ double accuracy(const std::vector<double> &y_true,
       ++correct;
   return double(correct) / y_pred.size();
 }
-/**
- * Computes the Residual Sum of Squares (RSS)
- * y_true: true target values (e.g., labels or regression targets)
- * y_pred: model predicted values (e.g., probabilities for logistic regression)
- */
+
 double rss(const std::vector<double> &y_true,
            const std::vector<double> &y_pred) {
   if (y_true.size() != y_pred.size() || y_true.empty())
@@ -30,11 +21,7 @@ double rss(const std::vector<double> &y_true,
     rss += (y_true[i] - y_pred[i]) * (y_true[i] - y_pred[i]);
   return rss;
 }
-/**
- * Computes the Total Sum of Squares between predictions and true targets.
- * y_true: true target values (e.g., labels or regression targets)
- * y_pred: model predicted values (e.g., probabilities for logistic regression)
- */
+
 double tss(const std::vector<double> &y_true,
            const std::vector<double> &y_pred) {
   if (y_true.size() != y_pred.size() || y_true.empty())
@@ -45,11 +32,7 @@ double tss(const std::vector<double> &y_true,
     tss += (y_true[i] - mean) * (y_true[i] - mean);
   return tss;
 }
-/**
- * Computes the R^2 (coefficient of determination) between predictions and true targets.
- * y_true: true target values (e.g., labels or regression targets)
- * y_pred: model predicted values (e.g., probabilities for logistic regression)
- */
+
 double r2_score(const std::vector<double> &y_true,
                 const std::vector<double> &y_pred) {
   if (y_true.size() != y_pred.size() || y_true.empty())

@@ -3,7 +3,7 @@
 #include "load_files.h"
 #include "kfolds.h"
 #include "logistic_regression.h"
-#include "scoring.cpp"
+#include "scoring.h"
 
 using namespace std;
 
