@@ -25,8 +25,12 @@ int main() {
   cout << X_test.size() << endl;
   cout << X_train.size() << endl;
 
-  vector<double> w;
-  logistic_regression(X_train, y_train, w, 1, .05, 500);
-  cout << "Accuracy: " << accuracy(y_test, predict_class(X_test, w, .5)) << endl;
-  cout << "R2: " << r2_score(y_test, predict_class(X_test, w, .5)) << endl;
+  std::vector<double> l;
+  LogReg reg(X_train, y_train, l, Penalty::L2);
+  reg.fit();
+
+  std::vector<double> y_pred = reg.predict(X_test);
+  cout << "Accuracy: " << accuracy(y_test, y_pred) << endl;
+  cout << "R2: " << r2_score(y_test, y_pred) << endl;
+  return 0;
 }  

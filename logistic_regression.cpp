@@ -1,19 +1,16 @@
 #include "logistic_regression.h"
 
-double sigmoid(double z) {
-  if (z >= 0)
-    return 1.0 / (1.0 + std::exp(-z));
-  else
-    return std::exp(z) / (1.0 + std::exp(z));  
-}  
-
 void LogReg::fit(double lr, int epochs) {
+  std::fill(m_weights.begin(), m_weights.end(), 0);
+
   size_t n = m_X.size();
   size_t d = m_X[0].size();
+  std::vector<double> grad_w(d + 1, 0.0);
 
   for (int e = 0; e < epochs; ++e) {
-    std::vector<double> grad_w(d+1, 0.0); // Gradient accumulator for weights
-    
+
+    std::fill(grad_w.begin(), grad_w.end(), 0.0);
+
     // ----- Compute gradients -----
     for (size_t i = 0; i < n; ++i) {
       // Calculate linear combination for sample i
@@ -22,29 +19,36 @@ void LogReg::fit(double lr, int epochs) {
 	z += m_weights[j] * m_X[i][j];
       double y_pred = sigmoid(z);           // Model prediction
       double error = y_pred - m_y[i];         // Error term
-      
+
       // Contribute to gradients for weights and bias
       for (size_t j = 0; j < d; ++j)
 	grad_w[j] += error * m_X[i][j];
       grad_w.back() += error;
     }
+
+
     for (size_t j = 0; j < d; ++j) {
-      grad_w[j] /= n; // Normalize by number of samples
       
+      grad_w[j] /= n; // Normalize by number of samples
+
       // Add penalty gradient depending on chosen penalty
+
       if (m_penalty == Penalty::L2) {
-	grad_w[j] += m_lambdas[0] * m_weights[j]; // L2: derivative is lambda * w_j
+        grad_w[j] +=
+            m_lambdas[0] * m_weights[j]; // L2: derivative is lambda * w_j
       } else if (m_penalty == Penalty::L1) {
 	// L1: subgradient is lambda * sign(w_j), not differentiable at zero
-	grad_w[j] += m_lambdas[0] * (m_weights[j] == 0 ? 0 : (m_weights[j] > 0 ? 1 : -1));
+        grad_w[j] += m_lambdas[0] *
+                     (m_weights[j] == 0 ? 0 : (m_weights[j] > 0 ? 1 : -1));        
       }
       // else: No penalty
       m_weights[j] -= lr * grad_w[j]; // Gradient descent step for weight
     }
-    grad_w.back() /= n;                 // Normalize bias gradient
-    m_weights.back() -= lr * grad_w.back();            // Gradient descent step for bias    
-  }    
-}  
+
+    grad_w.back() /= n; // Normalize bias gradient
+    m_weights.back() -= lr * grad_w.back(); // Gradient descent step for bias
+  }
+}
 
 void logistic_regression(const std::vector<std::vector<double>> &X,
                          const std::vector<double> &y, std::vector<double> &w,
@@ -93,24 +97,13 @@ void logistic_regression(const std::vector<std::vector<double>> &X,
   }
 }
 
-double logistic_regression_cv(const std::vector<std::vector<double>> &X,
-                              const std::vector<double> &y,
-                              std::vector<double> &w,
-                              std::pair<double, double> region, size_t k,
-                              double lr, int epochs, Penalty penalty) {
-  std::vector<double> ls = logspace(region, k);
-  
-  return 0.0;
-}
 
-std::vector<double> logspace(std::pair<double, double> region, size_t k) {
-  std::vector<double> lambdas(k, 0.0);
+void LogRegCV::set_logspace(std::pair<double, double> region, size_t k) {
   if (k == 1)
-    lambdas[0] = std::pow(10.0, region.first);
+    m_logspace[0] = std::pow(10.0, region.first);
   double step = (region.second - region.first) / (k - 1);
   for (size_t i = 0; i < k; ++i)
-    lambdas[i] = std::pow(10.0, region.first + i * step);
-  return lambdas;
+    m_logspace[i] = std::pow(10.0, region.first + i * step);
 }  
 
 // Returns sigmoid(w^T x + b)

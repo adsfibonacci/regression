@@ -2,16 +2,26 @@
 #define LOGREG_H
 
 #include "regressor.h"
-#include <cmath>
-
-double sigmoid(double z);
 
 class LogReg : public Regressor {
 public:
   LogReg(std::vector<std::vector<double>> &X, std::vector<double> &y,
-         std::vector<double> &lambdas);
-  virtual void fit(double lr, int epochs) override;
-};  
+         std::vector<double> &lambdas, Penalty penalty)
+    : Regressor(X, y, lambdas, penalty) {};
+  
+  virtual void fit(double lr = 0.05, int epochs = 1000) override;
+};
+
+class LogRegCV {
+private:
+  LogReg m_reg;
+  std::vector<double> m_logspace;  
+public:
+  LogRegCV(std::vector<std::vector<double>> &X, std::vector<double> &y,
+           std::vector<double> &lambdas, Penalty penalty)
+    : m_reg(X, y, lambdas, penalty) {}
+  void set_logspace(std::pair<double, double> region, size_t k);
+};
 
 /**
  * Trains logistic regression with optional L1/L2/no penalty using batch gradient descent.
@@ -27,15 +37,6 @@ void logistic_regression(const std::vector<std::vector<double>> &X,
                          const std::vector<double> &y, std::vector<double> &w,
                          double lambda = 1.0, double lr = 0.01,
                          int epochs = 1000, Penalty penalty = Penalty::L2);
-
-double logistic_regression_cv(const std::vector<std::vector<double>> &X,
-                              const std::vector<double> &y,
-                              std::vector<double> &w,
-                              std::pair<double, double> region = {-2, 2},
-                              size_t k = 5, double lr = 0.01, int epochs = 1000,
-                              Penalty penalty = Penalty::L2);
-
-std::vector<double> logspace(std::pair<double, double> region, size_t k);
 
 /**
  * Returns the prediction of one sample via the formula <x,w> + b

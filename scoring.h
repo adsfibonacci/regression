@@ -1,9 +1,10 @@
 #ifndef SCORING_H
 #define SCORING_H
 
-#include <numeric>
+#include <cmath>
 #include <vector>
 #include <limits>
+#include <numeric>
 
 /**
  * @brief Returns the fraction of equal entries in two vectors as accuracy.
@@ -40,4 +41,6 @@ double tss(const std::vector<double> &y_true,
  **/
 double r2_score(const std::vector<double> &y_true,
                 const std::vector<double> &y_pred);
+
+double sigmoid(double z);
 #endif

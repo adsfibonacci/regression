@@ -43,3 +43,10 @@ double r2_score(const std::vector<double> &y_true,
   
   return 1.0 - ss_res / ss_tot;
 }
+
+double sigmoid(double z) {
+  if (z >= 0)
+    return 1.0 / (1.0 + std::exp(-z));
+  else
+    return std::exp(z) / (1.0 + std::exp(z));  
+}
