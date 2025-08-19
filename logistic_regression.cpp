@@ -2,9 +2,9 @@
 
 double sigmoid(double z) {
   if (z >= 0)
-    return 1.0 / (1.0 + exp(-z));
+    return 1.0 / (1.0 + std::exp(-z));
   else
-    return exp(z) / (1.0 + exp(z));  
+    return std::exp(z) / (1.0 + std::exp(z));  
 }  
 
 void LogReg::fit(double lr, int epochs) {
