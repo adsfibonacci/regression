@@ -19,9 +19,9 @@ int main() {
   
   vector<vector<double>> X_train, X_test;
   vector<double> y_train, y_test;
-  vector<vector<size_t>> folds = kfolds(y.size(), 10, (int)time(0));
-  train_test_split(X, y, X_train, y_train, X_test, y_test, folds, .2);
-
+  vector<vector<size_t>> folds = stratified_kfolds(y, 10, (int)time(0));
+  kminusone(X, y, X_train, y_train, X_test, y_test, folds, 3);
+  
   cout << X_test.size() << endl;
   cout << X_train.size() << endl;
 
