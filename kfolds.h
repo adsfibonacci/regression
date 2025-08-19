@@ -76,5 +76,11 @@ void train_test_split(
     std::vector<std::vector<double>> &X_test, std::vector<double> &y_test,
     std::vector<std::vector<size_t>> &fold, double test_fraction = 0.2);
 
+void kminusone(
+    const std::vector<std::vector<double>> &X, const std::vector<double> &y,
+    std::vector<std::vector<double>> &X_train, std::vector<double> &y_train,
+    std::vector<std::vector<double>> &X_test, std::vector<double> &y_test,
+    std::vector<std::vector<size_t>> &fold, size_t out);
+
 
 #endif

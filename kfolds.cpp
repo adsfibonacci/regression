@@ -112,3 +112,25 @@ void train_test_split(const std::vector<std::vector<double>> &X,
     y_train.insert(y_train.end(), temp_y.begin(), temp_y.end());
   }
 }
+
+void kminusone(
+    const std::vector<std::vector<double>> &X, const std::vector<double> &y,
+    std::vector<std::vector<double>> &X_train, std::vector<double> &y_train,
+    std::vector<std::vector<double>> &X_test, std::vector<double> &y_test,
+    std::vector<std::vector<size_t>> &fold, size_t out) {
+  X_train.clear(); X_test.clear();
+  y_train.clear(); y_test.clear();
+
+  X_test = index(X, fold[out]);
+  y_test = index(y, fold[out]);
+
+  for (size_t i = 0; i < fold.size(); ++i) {
+    if(i == out) continue;
+    std::vector<std::vector<double>> temp_x = index(X, fold[i]);
+    std::vector<double> temp_y = index(y, fold[i]);
+    X_train.insert(X_train.end(), temp_x.begin(), temp_x.end());
+    y_train.insert(y_train.end(), temp_y.begin(), temp_y.end());
+  }
+}
+
+

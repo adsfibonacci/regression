@@ -1,15 +1,17 @@
 #ifndef LOGREG_H
 #define LOGREG_H
 
-#include <vector>
+#include "regressor.h"
 #include <cmath>
-#include <string>
-#include <algorithm> 
-#include <ctime>
 
-enum class Penalty { None, L1, L2 };
-Penalty string_to_penalty(const std::string &s);
 double sigmoid(double z);
+
+class LogReg : public Regressor {
+public:
+  LogReg(std::vector<std::vector<double>> &X, std::vector<double> &y,
+         std::vector<double> &lambdas);
+  virtual void fit(double lr, int epochs) override;
+};  
 
 /**
  * Trains logistic regression with optional L1/L2/no penalty using batch gradient descent.
@@ -25,6 +27,15 @@ void logistic_regression(const std::vector<std::vector<double>> &X,
                          const std::vector<double> &y, std::vector<double> &w,
                          double lambda = 1.0, double lr = 0.01,
                          int epochs = 1000, Penalty penalty = Penalty::L2);
+
+double logistic_regression_cv(const std::vector<std::vector<double>> &X,
+                              const std::vector<double> &y,
+                              std::vector<double> &w,
+                              std::pair<double, double> region = {-2, 2},
+                              size_t k = 5, double lr = 0.01, int epochs = 1000,
+                              Penalty penalty = Penalty::L2);
+
+std::vector<double> logspace(std::pair<double, double> region, size_t k);
 
 /**
  * Returns the prediction of one sample via the formula <x,w> + b

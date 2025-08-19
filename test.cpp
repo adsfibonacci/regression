@@ -12,11 +12,6 @@ template <typename T> ostream &operator<<(ostream &os, const vector<T> &v) {
     os << v[i] << "\t";
   return os;
 }
-template <typename T> ostream &operator<<(ostream &os, const vector<vector<T>> &v) {  
-  for (size_t i = 0; i < v.size(); ++i)
-    os << v[i] << "\n";
-  return os;
-}
 
 int main() {
   vector<vector<double>> X = loadMatrix("design_matrix.txt");
@@ -29,7 +24,7 @@ int main() {
 
   cout << X_test.size() << endl;
   cout << X_train.size() << endl;
-  
+
   vector<double> w;
   logistic_regression(X_train, y_train, w, 1, .05, 500);
   cout << "Accuracy: " << accuracy(y_test, predict_class(X_test, w, .5)) << endl;
