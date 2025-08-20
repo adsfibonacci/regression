@@ -14,11 +14,19 @@ Regressor::predict(const std::vector<std::vector<double>> &X_test) {
   for (size_t i = 0; i < X_test.size(); ++i) {
     probas.push_back(_predict(X_test[i]));
   }    
-  return probas;      
+  return probas;
 }
+std::vector<double>
+Regressor::predict_class(const std::vector<std::vector<double>> &X_test) {
+  std::vector<double> probas = predict(X_test);
+  std::for_each(probas.begin(), probas.end(),
+                [](double &n) { n = std::round(n); });
+  return probas;
+}  
 void Regressor::set_new(const std::vector<std::vector<double>> &X,
-                        const std::vector<double> &y) {
+                        const std::vector<double> &y,
+                        const std::vector<double> lambdas) {  
   m_X = X;
   m_y = y;
+  m_lambdas = lambdas;  
 }
-

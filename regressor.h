@@ -27,7 +27,7 @@ protected:
   
 public:
   Regressor(const std::vector<std::vector<double>> &X, const std::vector<double> &y,
-            std::vector<double> &lambdas, Penalty penalty = Penalty::L2)
+            std::vector<double> lambdas, Penalty penalty = Penalty::L2)
       : m_X(X), m_y(y), m_lambdas(lambdas), m_weights(X[0].size() + 1, 0.0),
         m_penalty(penalty) {    
     if (lambdas.size() == 0)
@@ -36,8 +36,10 @@ public:
   
   virtual void fit(double lr = 0.05, int epochs = 1000) = 0;
   std::vector<double> predict(const std::vector<std::vector<double>> &X_test);
+  std::vector<double> predict_class(const std::vector<std::vector<double>> &X_test);  
   void set_new(const std::vector<std::vector<double>> &X,
-               const std::vector<double> &y);
+               const std::vector<double> &y,
+               const std::vector<double> lambdas);  
 };
 
 #endif 

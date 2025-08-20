@@ -5,12 +5,24 @@
 
 class LogReg : public Regressor {
 public:
-  LogReg(std::vector<std::vector<double>> &X, std::vector<double> &y,
-         std::vector<double> lambdas, Penalty penalty)
-    : Regressor(X, y, lambdas, penalty) {};
+  LogReg(const std::vector<std::vector<double>> &X, const std::vector<double> &y,
+         double lambda, Penalty penalty)
+    : Regressor(X, y, {lambda}, penalty) {};
 
   virtual void fit(double lr = 0.05, int epochs = 1000) override;
   void set_lambda(double l);
+};
+
+class LassoReg : public Regressor {
+private:
+  void _moderate_d(double lr = 0.05, int epochs = 1000);
+  void _large_d(double lr = 0.05, int epochs = 1000);  
+public:
+  LassoReg(std::vector<std::vector<double>> &X, const std::vector<double> &y,
+           double lambda)
+    : Regressor(X, y, {lambda}, Penalty::L1) {};
+  virtual void fit(double lr = 0.05, int epochs = 1000) override;
+  void set_lambda(double l);  
 };
 
 class CV {
@@ -23,7 +35,7 @@ private:
 public:
   CV(std::vector<std::vector<double>> &X, std::vector<double> &y,
      Penalty penalty, std::vector<double> &lambdas)
-      : m_reg(std::make_unique<LogReg>(X, y, lambdas, penalty)), m_X(X),
+    : m_reg(std::make_unique<LogReg>(X, y, lambdas[0], penalty)), m_X(X),
         m_y(y) {}  
   void set_logspace(std::pair<double, double> region, size_t k);
   double fit(size_t folds = 10, double lr = 0.05, int epochs=1000, bool strat = false, unsigned int seed = 432);

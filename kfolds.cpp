@@ -22,7 +22,7 @@ std::vector<std::vector<size_t>> kfolds(size_t samples, size_t k,
 std::vector<std::vector<size_t>>
 stratified_kfolds(std::vector<double> &y, size_t k, unsigned int seed) {
   std::unordered_map<double, std::vector<size_t>> class_indices;
-  std::cout << y.size() << std::endl;  
+
   for (size_t i = 0; i < y.size(); ++i)
     class_indices[y[i]].push_back(i);
   
@@ -35,6 +35,7 @@ stratified_kfolds(std::vector<double> &y, size_t k, unsigned int seed) {
     std::shuffle(indices.begin(), indices.end(), rng);
     cursors[c] = 0;
   }
+
   while (true) {
     remaining = false;
     for (auto& [c, indices] : class_indices) {
@@ -47,11 +48,12 @@ stratified_kfolds(std::vector<double> &y, size_t k, unsigned int seed) {
     if (!remaining)
       break;
   }
-  
+
   std::vector<std::vector<size_t>> kfolds(k);
   for (size_t i = 0; i < combined_indices.size(); ++i) {
     kfolds[i % k].push_back(combined_indices[i]);
   }
+
   return kfolds;
 }
 

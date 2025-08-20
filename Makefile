@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -I$(GUROBI_HOME)/include -Wall -Werror
+CXXFLAGS = -Wall -Werror
 # LDFLAGS = -L$(GUROBI_HOME)/lib -lgurobi_c++ -lgurobi120
 
 TARGET = test
