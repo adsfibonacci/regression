@@ -9,10 +9,16 @@ double Regressor::_predict(const std::vector<double> &x) {
   return sigmoid(z);
 }
 std::vector<double>
-Regressor::predict(const std::vector<std::vector<double>> &X_test) {
+Regressor::predict(const std::vector<std::vector<double>> &X_test) {  
   std::vector<double> probas;
   for (size_t i = 0; i < X_test.size(); ++i) {
     probas.push_back(_predict(X_test[i]));
   }    
   return probas;      
-}      
+}
+void Regressor::set_new(const std::vector<std::vector<double>> &X,
+                        const std::vector<double> &y) {
+  m_X = X;
+  m_y = y;
+}
+

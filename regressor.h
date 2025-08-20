@@ -5,8 +5,11 @@
 #include <cmath>
 #include <iostream>
 #include <cassert>
+#include <memory>
+#include <utility>
 
 #include "scoring.h"
+#include "kfolds.h"
 
 enum class Penalty { None, L1, L2 };
 double sigmoid(double z);
@@ -21,9 +24,9 @@ protected:
   std::vector<double> m_lambdas;
   std::vector<double> m_weights;
   Penalty m_penalty;
-
+  
 public:
-  Regressor(std::vector<std::vector<double>> &X, std::vector<double> &y,
+  Regressor(const std::vector<std::vector<double>> &X, const std::vector<double> &y,
             std::vector<double> &lambdas, Penalty penalty = Penalty::L2)
       : m_X(X), m_y(y), m_lambdas(lambdas), m_weights(X[0].size() + 1, 0.0),
         m_penalty(penalty) {    
@@ -33,6 +36,8 @@ public:
   
   virtual void fit(double lr = 0.05, int epochs = 1000) = 0;
   std::vector<double> predict(const std::vector<std::vector<double>> &X_test);
+  void set_new(const std::vector<std::vector<double>> &X,
+               const std::vector<double> &y);
 };
 
 #endif 

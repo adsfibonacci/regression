@@ -49,113 +49,36 @@ void LogReg::fit(double lr, int epochs) {
     m_weights.back() -= lr * grad_w.back(); // Gradient descent step for bias
   }
 }
-
-void logistic_regression(const std::vector<std::vector<double>> &X,
-                         const std::vector<double> &y, std::vector<double> &w,
-			 double lambda, double lr,
-                         int epochs, Penalty penalty) {
-  
-  size_t n = X.size();     // Number of training examples
-  size_t d = X[0].size();  // Number of features
-  w.assign(d+1, 0.0);        // Initialize weights to zero
-  
-  for (int epoch = 0; epoch < epochs; ++epoch) {
-    std::vector<double> grad_w(d+1, 0.0); // Gradient accumulator for weights
-    
-    // ----- Compute gradients -----
-    for (size_t i = 0; i < n; ++i) {
-      // Calculate linear combination for sample i
-      double z = w.back();
-      for (size_t j = 0; j < d; ++j)
-	z += w[j] * X[i][j];
-      double y_pred = sigmoid(z);           // Model prediction
-      double error = y_pred - y[i];         // Error term
-      
-      // Contribute to gradients for weights and bias
-      for (size_t j = 0; j < d; ++j)
-	grad_w[j] += error * X[i][j];
-      grad_w.back() += error;
-    }
-    
-    // ----- Normalize and add penalty gradients -----
-    for (size_t j = 0; j < d; ++j) {
-      grad_w[j] /= n; // Normalize by number of samples
-      
-      // Add penalty gradient depending on chosen penalty
-      if (penalty == Penalty::L2) {
-	grad_w[j] += lambda * w[j]; // L2: derivative is lambda * w_j
-      } else if (penalty == Penalty::L1) {
-	// L1: subgradient is lambda * sign(w_j), not differentiable at zero
-	grad_w[j] += lambda * (w[j] == 0 ? 0 : (w[j] > 0 ? 1 : -1));
-      }
-      // else: No penalty
-      w[j] -= lr * grad_w[j]; // Gradient descent step for weight
-    }
-    
-    grad_w.back() /= n;                 // Normalize bias gradient
-    w.back() -= lr * grad_w.back();            // Gradient descent step for bias
-  }
+void LogReg::set_lambda(double l) {
+  m_lambdas[0] = l;
 }
-
-
-void LogRegCV::set_logspace(std::pair<double, double> region, size_t k) {
-  if (k == 1)
-    m_logspace[0] = std::pow(10.0, region.first);
+void CV::set_logspace(std::pair<double, double> region, size_t k) {
+  if (k <= 1)
+    m_logspace = {std::pow(10.0, region.first)};
   double step = (region.second - region.first) / (k - 1);
+  m_logspace.assign(k, 0.0);
   for (size_t i = 0; i < k; ++i)
-    m_logspace[i] = std::pow(10.0, region.first + i * step);
-}  
-
-// Returns sigmoid(w^T x + b)
-double predict_one(const std::vector<double> &x,
-                   const std::vector<double> &w) {
-  double z = w.back();
-  for (size_t j = 0; j < w.size() - 1; ++j)
-    z += w[j] * x[j];
-  return 1.0 / (1.0 + std::exp(-z));
+    m_logspace[i] = std::pow(10.0, region.first + i * step);  
 }
-
-// Predicts probabilities for all rows in X_test
-std::vector<double>
-predict_proba(const std::vector<std::vector<double>> &X_test,
-              const std::vector<double> &w) {
-  std::vector<double> probas;
-  for (const auto& x : X_test)
-    probas.push_back(predict_one(x, w));
-  return probas;
-}
-// Predicts classes (0/1) for all test samples using a threshold (default 0.5)
-std::vector<double>
-predict_class(const std::vector<std::vector<double>> &X_test,
-              const std::vector<double> &w, double thresh) {
-  std::vector<double> preds;
-  for (const auto& x : X_test) {
-    double p = predict_one(x, w);
-    preds.push_back(p >= thresh ? 1 : 0);
+double CV::fit(size_t folds, double lr, int epochs, bool strat,
+                   unsigned int seed) {
+  std::vector<std::vector<double>> X_train, X_test;
+  std::vector<double> y_train, y_test;
+  std::vector<double> s;
+  s.reserve(m_logspace.size());
+  
+  if (strat)
+    m_kfolds = stratified_kfolds(m_y, folds, seed);
+  else
+    m_kfolds = kfolds(m_y.size(), folds, seed);
+  for (size_t i = 0; i < m_logspace.size(); ++i) {
+    kminusone(m_X, m_y, X_train, y_train, X_test, y_test, m_kfolds,
+              seed % m_kfolds.size());
+    m_reg->set_new(X_train, y_train);
+    m_reg->fit();
+    std::vector<double> y_pred = m_reg->predict(X_test);
+    s.push_back(accuracy(y_test, y_pred));
   }
-  return preds;
+  
+  return m_logspace[distance(s.begin(), max_element(s.begin(), s.end()))];
 }
-
-
-// Example usage: train on AND logic
-// int main() {
-//   vector<vector<double>> X = loadMatrix("design_matrix.txt");
-//   vector<double> y = loadVector("responses.txt");
-//   vector<vector<double>> X_train, X_test;
-//   vector<double> y_train, y_test;
-//     train_test_split(X, y, X_train, y_train, X_test, y_test, .333, (int)time(0));
-//     
-//     // Output parameters
-//     vector<double> w;
-//     double b;
-//     
-//     // Choose penalty: "l2", "l1", or "none"
-//     string method = "l2";
-//     logistic_regression(X_train, y_train, w, b, 1.0, 0.1, 1000,
-// 			string_to_penalty(method));
-//     vector<double> y_pred = predict_class(X_test, w, b, .5);
-//     
-//     cout << "Accuracy: " << accuracy(y_test, y_pred) << endl;  
-//     cout << "R2: " << r2_score(y_test, y_pred) << endl;
-//     cout << "Learned bias: " << b << "\n";
-// }
