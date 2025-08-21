@@ -27,10 +27,10 @@ int main() {
 
   LassoReg mod(X_train, y_train, 1.0);
   mod.fit(0.00001);
-
+  
   vector<double> y_pred = mod.predict_class(X_test);
   cout << y_pred << endl;
   cout << "Accuracy: " << accuracy(y_test, y_pred) << endl;
   cout << "R2: " << r2_score(y_test, y_pred) << endl;
   return 0;
-}  
+} 

@@ -51,6 +51,7 @@ void LogReg::fit(double lr, int epochs) {
   }
 }
 void LogReg::set_lambda(double l) { m_lambdas[0] = l; }
+
 void LassoReg::_moderate_d(double lr, int epochs) {
   std::fill(m_weights.begin(), m_weights.end(), 0.0);
   size_t n = m_X.size();
@@ -84,8 +85,10 @@ void LassoReg::_moderate_d(double lr, int epochs) {
 }
 void LassoReg::_large_d(double lr, int epochs) {
   size_t n = m_X.size(), d = m_X[0].size();
-  for (size_t i = 0; i <=d; ++i) std::cout << m_weights[i] << std::endl;  
-  assert(m_weights.size() == d+1);
+  // for (size_t i = 0; i <=d; ++i) std::cout << m_weights[i] << std::endl;
+  
+  assert((n > 0) && (m_weights.size() == d + 1) && (d > 0));
+  
   for (int epoch = 0; epoch < epochs; ++epoch) {
     std::vector<double> grad(d + 1, 0.0);
     
@@ -118,15 +121,15 @@ void LassoReg::_large_d(double lr, int epochs) {
   }
   // for (size_t i = 0; i <=d; ++i) std::cout << m_weights[i] << std::endl;
 }
-
 void LassoReg::fit(double lr, int epochs) {
   std::fill(m_weights.begin(), m_weights.end(), 0.0);
   if (m_X[0].size() > m_X.size() * 2)
     _large_d(lr, epochs);
   else
     _moderate_d(lr,epochs);    
-}  
-void LassoReg::set_lambda(double l) { m_lambdas[0] = l;}
+}
+void LassoReg::set_lambda(double l) { m_lambdas[0] = l; }
+
 void CV::set_logspace(std::pair<double, double> region, size_t k) {
   if (k <= 1)
     m_logspace = {std::pow(10.0, region.first)};
