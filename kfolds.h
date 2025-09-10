@@ -9,7 +9,6 @@
 #define KFOLDS_H
 
 /**
- * Added temp docstring
  * Return N-folds of indices to define the X_train/test and y_train/test
  * @param samples: should be the first dimension of the design matrix
  * @param k: the number of folds to make
